@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSCC - JavaScript C Compiler</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        h1 {
+            color: #4ec9b0;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            background-color: #252526;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        #output {
+            background-color: #252526;
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #f48771;
+        }
+        .success {
+            color: #4ec9b0;
+        }
+    </style>
+</head>
+<body>
+    <h1>JSCC - JavaScript C Compiler</h1>
+    <p>Enter your C code below and click "Compile" to generate assembly code.</p>
+    
+    <textarea id="sourceCode" placeholder="Enter C code here...">
+// Example C code
+int glob = 10;
+int jack = 36;
+
+void test_void(void){
+    int a = 777;
+    int b = a;
+    b++;
+    return;
+}
+
+int test_int_ret(int a, int b){
+    a++;
+    b++;
+    char my_name[] = "Arash";
+    return a;
+}
+
+int main(){
+    char greet[] = "hello\n";
+    int v = 1;
+    int f = 8;
+
+    v++;
+    f++;
+
+    int k = -4 - 3 + 5 - 7 - 8 + 2 - 32;
+
+    int e = v;
+
+    test(1,2);
+
+    if(v == 2) {
+        int y = 5;
+        y++;
+    }
+
+    if(k == 35) {
+        int p = 55 + 34;
+    }
+
+    return 1;
+}
+    </textarea>
+    
+    <br>
+    <button onclick="compile()">Compile</button>
+    <button onclick="clearOutput()">Clear Output</button>
+    
+    <div id="output"></div>
+
+    <script src="tokenizer.js"></script>
+    <script src="parser.js"></script>
+    <script src="traverser.js"></script>
+    <script src="processor.js"></script>
+    <script src="verifier.js"></script>
+    <script src="codeGenerator.js"></script>
+    
+    <script>
+        function compile() {
+            const outputDiv = document.getElementById('output');
+            const sourceCode = document.getElementById('sourceCode').value;
+            
+            outputDiv.innerHTML = '';
+            outputDiv.className = '';
+            
+            try {
+                // Compilation pipeline
+                const tokens = tokenizer(sourceCode);
+                const ast = parser(tokens);
+                const transformedAst = transformer(ast);
+                const processedAst = processor(transformedAst);
+                const verified = verifier(processedAst[1][0].body);
+                const assembly = initGenerate(processedAst);
+                
+                outputDiv.className = 'success';
+                outputDiv.textContent = assembly || 'Compilation successful! Check console for output.';
+            } catch (error) {
+                outputDiv.className = 'error';
+                outputDiv.textContent = `Error: ${error.message}\n${error.stack}`;
+                console.error('Compilation error:', error);
+            }
+        }
+        
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('output').className = '';
+        }
+        
+        // Allow Ctrl+Enter to compile
+        document.getElementById('sourceCode').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                compile();
+            }
+        });
+    </script>
+</body>
+</html>
